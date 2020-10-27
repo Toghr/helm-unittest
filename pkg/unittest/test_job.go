@@ -148,7 +148,7 @@ type TestJob struct {
 	Values        []string
 	Set           map[string]interface{}
 	Template      string
-	Kind      	  string	   `yaml:"kind"`
+	Kind          string       `yaml:"kind"`
 	DocumentIndex *int         `yaml:"documentIndex"`
 	Assertions    []*Assertion `yaml:"asserts"`
 	Release       struct {
