@@ -90,6 +90,54 @@ asserts:
 	a.Equal(2, len(testResult.AssertsResult))
 }
 
+func TestV2RunJobByKindOk(t *testing.T) {
+	c, _ := v2util.Load(testV2BasicChart)
+	manifest := `
+it: should work
+kind: Deployment
+asserts:
+  - equal:
+      path: kind
+      value: Deployment
+`
+
+	var tj TestJob
+	yaml.Unmarshal([]byte(manifest), &tj)
+
+	testResult := tj.RunV2(c, &snapshot.Cache{}, &results.TestJobResult{})
+
+	a := assert.New(t)
+	cupaloy.SnapshotT(t, makeTestJobResultSnapshotable(testResult))
+
+	a.Nil(testResult.ExecError)
+	a.True(testResult.Passed)
+	a.Equal(1, len(testResult.AssertsResult))
+}
+
+func TestV2RunJobByKindFail(t *testing.T) {
+	c, _ := v2util.Load(testV2BasicChart)
+	manifest := `
+it: should work
+kind: Deployment
+asserts:
+  - equal:
+      path: kind
+      value: Job
+`
+
+	var tj TestJob
+	yaml.Unmarshal([]byte(manifest), &tj)
+
+	testResult := tj.RunV2(c, &snapshot.Cache{}, &results.TestJobResult{})
+
+	a := assert.New(t)
+	cupaloy.SnapshotT(t, makeTestJobResultSnapshotable(testResult))
+
+	a.Nil(testResult.ExecError)
+	a.False(testResult.Passed)
+	a.Equal(1, len(testResult.AssertsResult))
+}
+
 func TestV2RunJobWithNOTESTemplateOk(t *testing.T) {
 	c, _ := v2util.Load(testV2BasicChart)
 	manifest := `

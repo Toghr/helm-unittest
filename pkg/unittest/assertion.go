@@ -2,6 +2,7 @@ package unittest
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 
 	"github.com/lrills/helm-unittest/internal/common"
@@ -20,7 +21,7 @@ type Assertion struct {
 	validator        validators.Validatable
 	antonym          bool
 	defaultTemplates []string
-	Kind 			 string
+	Kind             string
 }
 
 // returns list of templates that match Kind from Assertion
@@ -51,7 +52,7 @@ func (a *Assertion) ChooseTemplatesByKind(
 			fmt.Fprintf(os.Stdout, " MATCH\n")
 			templatesToValidate = append(templatesToValidate, template)
 		} else {
-			fmt.Fprintf(os.Stdout,  " SKIP\n")
+			fmt.Fprintf(os.Stdout, " SKIP\n")
 		}
 
 	}
