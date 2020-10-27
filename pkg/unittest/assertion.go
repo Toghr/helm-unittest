@@ -20,6 +20,44 @@ type Assertion struct {
 	validator        validators.Validatable
 	antonym          bool
 	defaultTemplates []string
+	Kind 			 string
+}
+
+// returns list of templates that match Kind from Assertion
+// for example all 'Deployments'
+func (a *Assertion) ChooseTemplatesByKind(
+	templatesResult map[string][]common.K8sManifest,
+	snapshotComparer validators.SnapshotComparer,
+) []string {
+	fmt.Fprintf(os.Stdout, "Searching for templates to validate by kind: %s\n", a.Kind)
+
+	templatesToValidate := make([]string, 0)
+
+	kindValidator := new(validators.IsKindValidator)
+	kindValidator.Of = a.Kind
+
+	for template, rendered := range templatesResult {
+		ctx := &validators.ValidateContext{
+			Docs:             rendered,
+			Index:            a.DocumentIndex,
+			Negative:         a.Not != a.antonym,
+			SnapshotComparer: snapshotComparer,
+		}
+
+		var validatePassed bool
+		validatePassed, _ = kindValidator.Validate(ctx)
+		fmt.Fprintf(os.Stdout, "Template: %s", template)
+		if validatePassed {
+			fmt.Fprintf(os.Stdout, " MATCH\n")
+			templatesToValidate = append(templatesToValidate, template)
+		} else {
+			fmt.Fprintf(os.Stdout,  " SKIP\n")
+		}
+
+	}
+
+	fmt.Fprintf(os.Stdout, "Templates to verify: %s\n", templatesToValidate)
+	return templatesToValidate
 }
 
 // Assert validate the rendered manifests with validator
@@ -34,6 +72,12 @@ func (a *Assertion) Assert(
 	// Ensure assertion is succeeding or failing based on templates to test.
 	assertionPassed := false
 	failInfo := make([]string, 0)
+
+	if a.Kind != "" {
+		fmt.Fprintf(os.Stdout, "Checking kinds: %s\n", a.Kind)
+		//a.ChooseTemplatesByKind(templatesResult, snapshotComparer)
+		a.defaultTemplates = a.ChooseTemplatesByKind(templatesResult, snapshotComparer)
+	}
 
 	for idx, template := range a.defaultTemplates {
 		rendered, ok := templatesResult[template]
