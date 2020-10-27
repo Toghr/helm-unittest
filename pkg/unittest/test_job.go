@@ -148,6 +148,7 @@ type TestJob struct {
 	Values        []string
 	Set           map[string]interface{}
 	Template      string
+	Kind      	  string
 	DocumentIndex *int         `yaml:"documentIndex"`
 	Assertions    []*Assertion `yaml:"asserts"`
 	Release       struct {
@@ -483,6 +484,12 @@ func (t *TestJob) polishAssertionsTemplate(targetChartName string) {
 			}
 		} else {
 			templatesToAssert = append(templatesToAssert, assertion.Template)
+		}
+
+		if assertion.Kind == "" {
+			if t.Kind != "" {
+				assertion.Kind = t.Kind
+			}
 		}
 
 		// map the file name to the path of helm rendered result

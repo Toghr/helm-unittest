@@ -38,6 +38,7 @@ func ParseTestSuiteFile(suiteFilePath, chartRoute string) (*TestSuite, error) {
 type TestSuite struct {
 	Name      string `yaml:"suite"`
 	Templates []string
+	Kind 	   string
 	Release   struct {
 		Name      string
 		Namespace string
@@ -109,6 +110,10 @@ func (s *TestSuite) polishTestJobsPathInfo() {
 		s.polishReleaseSettings(test)
 		s.polishCapabilitiesSettings(test)
 		s.polishChartSettings(test)
+
+		if s.Kind != "" {
+			test.Kind = s.Kind
+		}
 
 		if len(s.Templates) > 0 {
 			test.defaultTemplatesToAssert = s.Templates
